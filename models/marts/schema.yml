@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: patient_summary
+    columns:
+      - name: patient_id
+        tests:
+          - not_null
+          - unique
+
+  - name: encounter_counts
+    columns:
+      - name: month_start
+        tests:
+          - not_null
+
+  - name: observation_trends
+    columns:
+      - name: observation_date
+        tests:
+          - not_null

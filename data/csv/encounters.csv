@@ -1,0 +1,2 @@
+encounter_id,patient_id,encounter_class,encounter_status,start_time,end_time
+csv-e1,csv-p1,AMB,finished,2025-02-01T10:00:00Z,2025-02-01T10:30:00Z

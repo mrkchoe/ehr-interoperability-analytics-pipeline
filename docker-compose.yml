@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ehr_postgres
+    environment:
+      POSTGRES_USER: ehr
+      POSTGRES_PASSWORD: ehr
+      POSTGRES_DB: ehr_analytics
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: ingestion/Dockerfile
+    container_name: ehr_ingestion
+    depends_on:
+      - postgres
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ehr
+      PGPASSWORD: ehr
+      PGDATABASE: ehr_analytics
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    command: sleep infinity
+
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.8.latest
+    container_name: ehr_dbt
+    depends_on:
+      - postgres
+    environment:
+      DBT_PROFILES_DIR: /workspace
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    command: sleep infinity
+
+volumes:
+  postgres_data:

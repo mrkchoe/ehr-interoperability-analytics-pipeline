@@ -1,0 +1,2 @@
+observation_id,patient_id,encounter_id,observation_code,observation_text,value_numeric,unit,observed_at
+csv-o1,csv-p1,csv-e1,29463-7,Body weight,75.2,kg,2025-02-01T10:10:00Z

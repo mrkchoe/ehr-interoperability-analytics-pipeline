@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: fhir_patients
+      - name: fhir_encounters
+      - name: fhir_conditions
+      - name: fhir_observations
+      - name: hl7_patients
+      - name: hl7_encounters
+      - name: hl7_observations
+      - name: csv_patients
+      - name: csv_encounters
+      - name: csv_observations

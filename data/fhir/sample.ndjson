@@ -1,0 +1,4 @@
+{"resourceType":"Patient","id":"fhir-p1","name":[{"family":"Smith","given":["Alice"]}],"gender":"female","birthDate":"1984-03-12"}
+{"resourceType":"Encounter","id":"fhir-e1","subject":{"reference":"Patient/fhir-p1"},"class":{"code":"AMB"},"status":"finished","period":{"start":"2025-01-10T09:00:00Z","end":"2025-01-10T09:45:00Z"}}
+{"resourceType":"Condition","id":"fhir-c1","subject":{"reference":"Patient/fhir-p1"},"encounter":{"reference":"Encounter/fhir-e1"},"code":{"coding":[{"code":"I10","display":"Essential hypertension"}],"text":"Hypertension"},"clinicalStatus":{"coding":[{"code":"active"}]},"onsetDateTime":"2025-01-10T09:10:00Z"}
+{"resourceType":"Observation","id":"fhir-o1","subject":{"reference":"Patient/fhir-p1"},"encounter":{"reference":"Encounter/fhir-e1"},"code":{"coding":[{"code":"8480-6","display":"Systolic blood pressure"}],"text":"Systolic blood pressure"},"valueQuantity":{"value":132,"unit":"mmHg"},"effectiveDateTime":"2025-01-10T09:15:00Z"}

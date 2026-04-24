@@ -1,0 +1,12 @@
+ehr_interoperability_analytics_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: postgres
+      user: ehr
+      password: ehr
+      port: 5432
+      dbname: ehr_analytics
+      schema: analytics
+      threads: 2

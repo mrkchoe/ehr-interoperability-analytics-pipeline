@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: patients
+    columns:
+      - name: patient_id
+        tests:
+          - not_null
+
+  - name: encounters
+    columns:
+      - name: encounter_id
+        tests:
+          - not_null
+          - unique
+      - name: patient_id
+        tests:
+          - relationships:
+              to: ref('patients')
+              field: patient_id
+
+  - name: observations
+    columns:
+      - name: observation_id
+        tests:
+          - not_null
+          - unique
+      - name: patient_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('patients')
+              field: patient_id
+      - name: encounter_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('encounters')
+              field: encounter_id

@@ -175,3 +175,4 @@ docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from anal
 
 - This repo intentionally favors readability and explicit mapping over advanced orchestration.
 - No cloud services, APIs, or auth are included.
+- Next minimal step: add a second synthetic dataset batch to demonstrate incremental loads.

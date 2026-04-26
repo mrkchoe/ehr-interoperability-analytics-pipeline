@@ -180,6 +180,12 @@ docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from anal
 docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.observation_trends order by observation_date, observation_code;"
 ```
 
+Optional one-file demo query run:
+
+```bash
+docker compose exec -T postgres psql -U ehr -d ehr_analytics < demo.sql
+```
+
 ## Notes
 
 - This repo intentionally favors readability and explicit mapping over advanced orchestration.

@@ -15,6 +15,15 @@ Minimal, production-style local data engineering project that ingests synthetic 
   - `encounter_counts`
   - `observation_trends`
 
+```text
+FHIR NDJSON ----\
+HL7 v2 ---------> Python loaders ----> raw.* tables ----> dbt staging ----> dbt marts
+CSV extracts ---/                                           (patients,        (analytics-ready
+                                                            encounters,       summary tables)
+                                                            conditions,
+                                                            observations)
+```
+
 ## Project Structure
 
 ```text

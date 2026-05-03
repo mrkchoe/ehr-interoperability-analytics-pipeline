@@ -46,6 +46,7 @@ CSV extracts ---/                                           (patients,        (a
 ├── docker-compose.yml
 ├── dbt_project.yml
 ├── profiles.yml
+├── demo.sql
 ├── run_pipeline.sh
 └── README.md
 ```

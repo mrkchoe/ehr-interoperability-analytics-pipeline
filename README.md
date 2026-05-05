@@ -45,6 +45,7 @@ CSV extracts ---/                                           (patients,        (a
 │   └── 001_init.sql
 ├── docker-compose.yml
 ├── dbt_project.yml
+├── Makefile
 ├── profiles.yml
 ├── demo.sql
 ├── run_pipeline.sh
@@ -78,6 +79,15 @@ Or run the full flow in one command:
 
 ```bash
 ./run_pipeline.sh
+```
+
+Or use make targets for common steps:
+
+```bash
+make up
+make ingest
+make dbt
+make demo
 ```
 
 ## Source to Unified Mapping
@@ -191,4 +201,5 @@ docker compose exec -T postgres psql -U ehr -d ehr_analytics < demo.sql
 
 - This repo intentionally favors readability and explicit mapping over advanced orchestration.
 - No cloud services, APIs, or auth are included.
+- All included records are synthetic sample data for local development demos.
 - Next minimal step: add a second synthetic dataset batch to demonstrate incremental loads.

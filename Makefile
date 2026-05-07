@@ -1,3 +1,5 @@
+.PHONY: up down reset ingest dbt pipeline demo
+
 up:
 	docker compose up -d
 

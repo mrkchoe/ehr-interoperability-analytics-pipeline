@@ -19,6 +19,19 @@ models:
               to: ref('patients')
               field: patient_id
 
+  - name: conditions
+    columns:
+      - name: condition_id
+        tests:
+          - not_null
+          - unique
+      - name: patient_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('patients')
+              field: patient_id
+
   - name: observations
     columns:
       - name: observation_id

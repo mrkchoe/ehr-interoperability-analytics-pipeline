@@ -11,6 +11,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ehr -d ehr_analytics"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   ingestion:
     build:
@@ -18,7 +23,8 @@ services:
       dockerfile: ingestion/Dockerfile
     container_name: ehr_ingestion
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       PGHOST: postgres
       PGPORT: 5432
@@ -34,7 +40,8 @@ services:
     image: ghcr.io/dbt-labs/dbt-postgres:1.8.latest
     container_name: ehr_dbt
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       DBT_PROFILES_DIR: /workspace
     volumes:

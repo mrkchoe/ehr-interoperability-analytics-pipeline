@@ -2,13 +2,8 @@
 
 set -euo pipefail
 
-echo "Starting containers..."
-docker compose up -d
-
-echo "Waiting for Postgres to be ready..."
-until docker compose exec postgres pg_isready -U ehr -d ehr_analytics > /dev/null 2>&1; do
-  sleep 1
-done
+echo "Starting containers (waiting for Postgres healthcheck)..."
+docker compose up -d --wait
 
 echo "Loading raw data..."
 docker compose exec ingestion python ingestion/fhir_loader.py

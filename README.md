@@ -113,14 +113,18 @@ make demo
 - Not null:
   - `patients.patient_id`
   - `encounters.encounter_id`
+  - `conditions.condition_id`
+  - `conditions.patient_id`
   - `observations.patient_id`
   - `observations.encounter_id`
 - Uniqueness:
   - `encounters.encounter_id`
+  - `conditions.condition_id`
   - `observations.observation_id`
   - `patient_summary.patient_id`
 - Referential integrity:
   - `encounters.patient_id` references `patients.patient_id`
+  - `conditions.patient_id` references `patients.patient_id`
   - `observations.patient_id` references `patients.patient_id`
   - `observations.encounter_id` references `encounters.encounter_id`
 

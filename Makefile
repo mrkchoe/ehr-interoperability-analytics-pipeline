@@ -1,4 +1,16 @@
-.PHONY: up down reset ingest dbt pipeline demo
+.PHONY: help up down reset ingest dbt pipeline demo
+
+.DEFAULT_GOAL := help
+
+help:
+	@echo "Targets:"
+	@echo "  make up        Start stack (waits for Postgres)"
+	@echo "  make down      Stop containers"
+	@echo "  make reset     Stop and remove volumes"
+	@echo "  make ingest    Load FHIR, HL7, and CSV into raw tables"
+	@echo "  make dbt       Run dbt models and tests"
+	@echo "  make pipeline  Full ingest + transform flow"
+	@echo "  make demo      Run demo.sql analytics queries"
 
 up:
 	docker compose up -d --wait

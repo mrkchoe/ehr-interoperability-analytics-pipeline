@@ -14,6 +14,7 @@ Minimal, production-style local data engineering project that ingests synthetic 
   - `patient_summary`
   - `encounter_counts`
   - `observation_trends`
+  - `records_by_source`
 
 ```text
 FHIR NDJSON ----\
@@ -87,6 +88,7 @@ Or use make targets for common steps:
 make up
 make ingest
 make dbt
+make counts
 make demo
 ```
 
@@ -139,6 +141,9 @@ select * from analytics.encounter_counts order by month_start, encounter_class;
 
 -- Observation metric trends over time
 select * from analytics.observation_trends order by observation_date, observation_code;
+
+-- Unified entity volume by upstream source (FHIR, HL7, CSV)
+select * from analytics.records_by_source order by entity, source_system;
 ```
 
 ## Demo Walkthrough
@@ -207,4 +212,4 @@ docker compose exec -T postgres psql -U ehr -d ehr_analytics < demo.sql
 - This repo intentionally favors readability and explicit mapping over advanced orchestration.
 - No cloud services, APIs, or auth are included.
 - All included records are synthetic sample data for local development demos.
-- Next minimal step: add a second synthetic dataset batch to demonstrate incremental loads.
+- `records_by_source` summarizes how many unified rows came from each upstream format.

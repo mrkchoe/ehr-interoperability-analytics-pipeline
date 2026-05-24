@@ -18,6 +18,9 @@ union all select 'conditions', count(*) from analytics.conditions
 union all select 'observations', count(*) from analytics.observations
 order by 1;
 
+-- Source-system coverage across unified entities
+select * from analytics.records_by_source order by entity, source_system;
+
 -- Final marts
 select * from analytics.patient_summary order by encounter_count desc;
 select * from analytics.encounter_counts order by month_start, encounter_class;

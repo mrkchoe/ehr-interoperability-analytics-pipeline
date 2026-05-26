@@ -25,9 +25,13 @@ models:
       - name: entity
         tests:
           - not_null
+          - accepted_values:
+              values: ['patients', 'encounters', 'conditions', 'observations']
       - name: source_system
         tests:
           - not_null
+          - accepted_values:
+              values: ['fhir', 'hl7', 'csv']
       - name: record_count
         tests:
           - not_null

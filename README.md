@@ -124,6 +124,9 @@ make demo
   - `conditions.condition_id`
   - `observations.observation_id`
   - `patient_summary.patient_id`
+- Accepted values:
+  - `records_by_source.entity` is one of `patients`, `encounters`, `conditions`, `observations`
+  - `records_by_source.source_system` is one of `fhir`, `hl7`, `csv`
 - Referential integrity:
   - `encounters.patient_id` references `patients.patient_id`
   - `conditions.patient_id` references `patients.patient_id`
@@ -199,6 +202,7 @@ order by 1;
 docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.patient_summary order by encounter_count desc;"
 docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.encounter_counts order by month_start, encounter_class;"
 docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.observation_trends order by observation_date, observation_code;"
+docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.records_by_source order by entity, source_system;"
 ```
 
 Optional one-file demo query run:

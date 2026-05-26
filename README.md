@@ -1,219 +1,80 @@
 # ehr-interoperability-analytics-pipeline
 
-Minimal, production-style local data engineering project that ingests synthetic EHR data from mixed healthcare formats (FHIR NDJSON, HL7 v2, CSV), standardizes it, and builds analytics-ready Postgres tables with dbt.
+A small local demo that standardizes synthetic EHR data from different formats into shared analytics tables.
 
-## Architecture
+It reads three common source formats:
 
-- **Raw ingestion schema (`raw`)**: one set of source-specific tables loaded by Python scripts.
-- **Standardized staging (`analytics`)**: dbt models unify source formats into shared entities:
-  - `patients`
-  - `encounters`
-  - `conditions`
-  - `observations`
-- **Marts (`analytics`)**: simple analytics outputs:
-  - `patient_summary`
-  - `encounter_counts`
-  - `observation_trends`
-  - `records_by_source`
+- FHIR NDJSON
+- HL7 v2
+- CSV extracts
+
+## Goal
+
+The project shows one simple interoperability pattern: load FHIR, HL7 v2, and CSV data, then normalize them into common `patients`, `encounters`, `conditions`, and `observations` models.
+
+## How It Works
 
 ```text
-FHIR NDJSON ----\
-HL7 v2 ---------> Python loaders ----> raw.* tables ----> dbt staging ----> dbt marts
-CSV extracts ---/                                           (patients,        (analytics-ready
-                                                            encounters,       summary tables)
-                                                            conditions,
-                                                            observations)
+FHIR / HL7 / CSV -> Python loaders -> raw Postgres tables -> standardized dbt models -> analytics tables
 ```
 
-## Project Structure
+The main analytics tables are:
 
-```text
-.
-├── data/
-│   ├── fhir/
-│   ├── hl7/
-│   └── csv/
-├── ingestion/
-│   ├── fhir_loader.py
-│   ├── hl7_parser.py
-│   ├── csv_loader.py
-│   ├── Dockerfile
-│   └── requirements.txt
-├── models/
-│   ├── staging/
-│   └── marts/
-├── sql/
-│   └── 001_init.sql
-├── docker-compose.yml
-├── dbt_project.yml
-├── Makefile
-├── profiles.yml
-├── demo.sql
-├── run_pipeline.sh
-└── README.md
-```
+- `patient_summary`
+- `encounter_counts`
+- `observation_trends`
+- `records_by_source`
 
 ## Quick Start
 
-1. Start local stack (waits for Postgres to be healthy):
+Run the whole pipeline:
 
 ```bash
-make up
+make pipeline
 ```
 
-2. Load raw data:
+Show the demo queries:
 
 ```bash
-docker compose exec ingestion python ingestion/fhir_loader.py
-docker compose exec ingestion python ingestion/hl7_parser.py
-docker compose exec ingestion python ingestion/csv_loader.py
-```
-
-3. Build analytics models and run tests:
-
-```bash
-docker compose exec dbt dbt run
-docker compose exec dbt dbt test
-```
-
-Or run the full flow in one command:
-
-```bash
-./run_pipeline.sh
-```
-
-Or use make targets for common steps:
-
-```bash
-make up
-make ingest
-make dbt
-make counts
 make demo
 ```
 
-## Source to Unified Mapping
+That is enough for the normal local demo. `make pipeline` starts the Docker stack, loads the sample data, runs dbt, runs tests, and prints row counts.
 
-### FHIR NDJSON
-- `Patient` -> `raw.fhir_patients` -> `analytics.patients`
-- `Encounter` -> `raw.fhir_encounters` -> `analytics.encounters`
-- `Condition` -> `raw.fhir_conditions` -> `analytics.conditions`
-- `Observation` -> `raw.fhir_observations` -> `analytics.observations`
-
-### HL7 v2
-- `PID` -> `raw.hl7_patients` -> `analytics.patients`
-- `PV1` -> `raw.hl7_encounters` -> `analytics.encounters`
-- `OBX` -> `raw.hl7_observations` -> `analytics.observations`
-
-### CSV
-- `patients.csv` -> `raw.csv_patients` -> `analytics.patients`
-- `encounters.csv` -> `raw.csv_encounters` -> `analytics.encounters`
-- `observations.csv` -> `raw.csv_observations` -> `analytics.observations`
-
-## dbt Tests Included
-
-- Not null:
-  - `patients.patient_id`
-  - `encounters.encounter_id`
-  - `conditions.condition_id`
-  - `conditions.patient_id`
-  - `observations.patient_id`
-  - `observations.encounter_id`
-- Uniqueness:
-  - `encounters.encounter_id`
-  - `conditions.condition_id`
-  - `observations.observation_id`
-  - `patient_summary.patient_id`
-- Accepted values:
-  - `records_by_source.entity` is one of `patients`, `encounters`, `conditions`, `observations`
-  - `records_by_source.source_system` is one of `fhir`, `hl7`, `csv`
-- Referential integrity:
-  - `encounters.patient_id` references `patients.patient_id`
-  - `conditions.patient_id` references `patients.patient_id`
-  - `observations.patient_id` references `patients.patient_id`
-  - `observations.encounter_id` references `encounters.encounter_id`
-
-## Example Analytics Queries
-
-```sql
--- Per-patient utilization summary
-select * from analytics.patient_summary order by encounter_count desc;
-
--- Monthly encounter volume by encounter class
-select * from analytics.encounter_counts order by month_start, encounter_class;
-
--- Observation metric trends over time
-select * from analytics.observation_trends order by observation_date, observation_code;
-
--- Unified entity volume by upstream source (FHIR, HL7, CSV)
-select * from analytics.records_by_source order by entity, source_system;
-```
-
-## Demo Walkthrough
-
-Use this flow for a quick project demo from empty local state to analytics output.
-
-1. Reset and start services:
+## Useful Commands
 
 ```bash
-docker compose down -v
-docker compose up -d
+make up        # start containers
+make ingest    # load FHIR, HL7, and CSV samples
+make dbt       # run dbt models and tests
+make counts    # show row counts for unified tables
+make demo      # run demo.sql
+make down      # stop containers
+make reset     # stop containers and remove volumes
 ```
 
-2. Load all source data and run transformations:
+## What Gets Built
 
-```bash
-./run_pipeline.sh
-```
+The loaders write source-specific tables into the `raw` schema. dbt then creates unified analytics models for:
 
-3. Show raw ingestion counts by source table:
+- `patients`
+- `encounters`
+- `conditions`
+- `observations`
 
-```bash
-docker compose exec postgres psql -U ehr -d ehr_analytics -c "
-select 'fhir_patients' as table_name, count(*) from raw.fhir_patients
-union all select 'hl7_patients', count(*) from raw.hl7_patients
-union all select 'csv_patients', count(*) from raw.csv_patients
-union all select 'fhir_encounters', count(*) from raw.fhir_encounters
-union all select 'fhir_conditions', count(*) from raw.fhir_conditions
-union all select 'hl7_encounters', count(*) from raw.hl7_encounters
-union all select 'csv_encounters', count(*) from raw.csv_encounters
-union all select 'fhir_observations', count(*) from raw.fhir_observations
-union all select 'hl7_observations', count(*) from raw.hl7_observations
-union all select 'csv_observations', count(*) from raw.csv_observations
-order by 1;
-"
-```
+The final marts answer simple questions:
 
-4. Show unified staging model counts:
+- patient-level utilization in `patient_summary`
+- monthly encounter volume in `encounter_counts`
+- observation trends over time in `observation_trends`
+- row counts by source format in `records_by_source`
 
-```bash
-docker compose exec postgres psql -U ehr -d ehr_analytics -c "
-select 'patients' as model_name, count(*) from analytics.patients
-union all select 'encounters', count(*) from analytics.encounters
-union all select 'conditions', count(*) from analytics.conditions
-union all select 'observations', count(*) from analytics.observations
-order by 1;
-"
-```
+## Data Quality
 
-5. Show final marts:
-
-```bash
-docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.patient_summary order by encounter_count desc;"
-docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.encounter_counts order by month_start, encounter_class;"
-docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.observation_trends order by observation_date, observation_code;"
-docker compose exec postgres psql -U ehr -d ehr_analytics -c "select * from analytics.records_by_source order by entity, source_system;"
-```
-
-Optional one-file demo query run:
-
-```bash
-docker compose exec -T postgres psql -U ehr -d ehr_analytics < demo.sql
-```
+dbt tests check required IDs, uniqueness for key tables, relationships between patients, encounters, conditions, and observations, and accepted values for `records_by_source`.
 
 ## Notes
 
-- This repo intentionally favors readability and explicit mapping over advanced orchestration.
-- No cloud services, APIs, or auth are included.
-- All included records are synthetic sample data for local development demos.
-- `records_by_source` summarizes how many unified rows came from each upstream format.
+- Everything runs locally with Docker Compose.
+- All data is synthetic sample data.
+- There are no cloud services, APIs, or auth.

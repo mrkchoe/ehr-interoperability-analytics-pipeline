@@ -1,4 +1,4 @@
-.PHONY: help up down reset ingest dbt pipeline counts demo
+.PHONY: help up down reset ingest dbt pipeline counts sources demo
 
 .DEFAULT_GOAL := help
 
@@ -11,6 +11,7 @@ help:
 	@echo "  make dbt       Run dbt models and tests"
 	@echo "  make pipeline  Full ingest + transform flow"
 	@echo "  make counts    Show staging model row counts"
+	@echo "  make sources   Show record counts by source system"
 	@echo "  make demo      Run demo.sql analytics queries"
 
 up:
@@ -41,6 +42,11 @@ union all select 'encounters', count(*) from analytics.encounters \
 union all select 'conditions', count(*) from analytics.conditions \
 union all select 'observations', count(*) from analytics.observations \
 order by 1;"
+
+sources:
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics -c "\
+select * from analytics.records_by_source \
+order by entity, source_system;"
 
 demo:
 	docker compose exec -T postgres psql -U ehr -d ehr_analytics < demo.sql

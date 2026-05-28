@@ -25,4 +25,10 @@ union all select 'observations', count(*) from analytics.observations
 order by 1;
 "
 
+echo "Records by source system:"
+docker compose exec -T postgres psql -U ehr -d ehr_analytics -c "
+select * from analytics.records_by_source
+order by entity, source_system;
+"
+
 echo "Pipeline complete."

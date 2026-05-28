@@ -48,6 +48,7 @@ make up        # start containers
 make ingest    # load FHIR, HL7, and CSV samples
 make dbt       # run dbt models and tests
 make counts    # show row counts for unified tables
+make sources   # show row counts by source format/entity
 make demo      # run demo.sql
 make down      # stop containers
 make reset     # stop containers and remove volumes

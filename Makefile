@@ -1,4 +1,4 @@
-.PHONY: help up down reset ingest dbt pipeline counts sources demo
+.PHONY: help up down reset ingest dbt pipeline raw counts sources demo
 
 .DEFAULT_GOAL := help
 
@@ -10,9 +10,10 @@ help:
 	@echo "  make ingest    Load FHIR, HL7, and CSV into raw tables"
 	@echo "  make dbt       Run dbt models and tests"
 	@echo "  make pipeline  Full ingest + transform flow"
+	@echo "  make raw       Show raw table row counts"
 	@echo "  make counts    Show staging model row counts"
 	@echo "  make sources   Show record counts by source system"
-	@echo "  make demo      Run demo.sql analytics queries"
+	@echo "  make demo      Run demo analytics queries"
 
 up:
 	docker compose up -d --wait
@@ -35,18 +36,17 @@ dbt:
 pipeline:
 	./run_pipeline.sh
 
+raw:
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/raw_counts.sql
+
 counts:
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics -c "\
-select 'patients' as model_name, count(*) from analytics.patients \
-union all select 'encounters', count(*) from analytics.encounters \
-union all select 'conditions', count(*) from analytics.conditions \
-union all select 'observations', count(*) from analytics.observations \
-order by 1;"
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/staging_counts.sql
 
 sources:
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics -c "\
-select * from analytics.records_by_source \
-order by entity, source_system;"
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/records_by_source.sql
 
 demo:
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < demo.sql
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/raw_counts.sql
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/staging_counts.sql
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/records_by_source.sql
+	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/demo_marts.sql

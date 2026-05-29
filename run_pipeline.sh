@@ -16,13 +16,8 @@ docker compose exec dbt dbt run
 echo "Running dbt tests..."
 docker compose exec dbt dbt test
 
-echo "Raw table row counts:"
-docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/raw_counts.sql
-
-echo "Staging model row counts:"
-docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/staging_counts.sql
-
-echo "Records by source system:"
-docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/records_by_source.sql
+echo "Pipeline summary:"
+cat sql/raw_counts.sql sql/staging_counts.sql sql/records_by_source.sql \
+  | docker compose exec -T postgres psql -U ehr -d ehr_analytics
 
 echo "Pipeline complete."

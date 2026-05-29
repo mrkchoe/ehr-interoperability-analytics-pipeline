@@ -1,3 +1,4 @@
+\echo 'Raw ingestion table counts'
 select 'fhir_patients' as table_name, count(*) from raw.fhir_patients
 union all select 'hl7_patients', count(*) from raw.hl7_patients
 union all select 'csv_patients', count(*) from raw.csv_patients

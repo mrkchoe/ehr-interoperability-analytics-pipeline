@@ -1,3 +1,4 @@
+\echo 'Unified staging model counts'
 select 'patients' as model_name, count(*) from analytics.patients
 union all select 'encounters', count(*) from analytics.encounters
 union all select 'conditions', count(*) from analytics.conditions

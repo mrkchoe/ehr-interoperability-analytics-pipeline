@@ -1,6 +1,8 @@
-.PHONY: help up down reset ingest dbt pipeline raw counts sources demo
+.PHONY: help up down reset ingest dbt pipeline raw counts sources marts demo
 
 .DEFAULT_GOAL := help
+
+PSQL = docker compose exec -T postgres psql -U ehr -d ehr_analytics
 
 help:
 	@echo "Targets:"
@@ -13,7 +15,8 @@ help:
 	@echo "  make raw       Show raw table row counts"
 	@echo "  make counts    Show staging model row counts"
 	@echo "  make sources   Show record counts by source system"
-	@echo "  make demo      Run demo analytics queries"
+	@echo "  make marts     Show final analytics marts"
+	@echo "  make demo      Run full demo query set"
 
 up:
 	docker compose up -d --wait
@@ -37,16 +40,16 @@ pipeline:
 	./run_pipeline.sh
 
 raw:
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/raw_counts.sql
+	$(PSQL) < sql/raw_counts.sql
 
 counts:
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/staging_counts.sql
+	$(PSQL) < sql/staging_counts.sql
 
 sources:
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/records_by_source.sql
+	$(PSQL) < sql/records_by_source.sql
+
+marts:
+	$(PSQL) < sql/demo_marts.sql
 
 demo:
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/raw_counts.sql
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/staging_counts.sql
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/records_by_source.sql
-	docker compose exec -T postgres psql -U ehr -d ehr_analytics < sql/demo_marts.sql
+	cat sql/raw_counts.sql sql/staging_counts.sql sql/records_by_source.sql sql/demo_marts.sql | $(PSQL)

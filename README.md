@@ -50,7 +50,8 @@ make dbt       # run dbt models and tests
 make raw       # show row counts for raw ingestion tables
 make counts    # show row counts for unified tables
 make sources   # show row counts by source format/entity
-make demo      # run demo analytics queries
+make marts     # show final analytics marts
+make demo      # run full demo query set
 make down      # stop containers
 make reset     # stop containers and remove volumes
 ```

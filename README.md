@@ -27,7 +27,13 @@ The main analytics tables are:
 
 ## Quick Start
 
-Run the whole pipeline:
+Run the whole pipeline from a clean slate:
+
+```bash
+make fresh
+```
+
+Or run the pipeline on an existing stack:
 
 ```bash
 make pipeline
@@ -45,6 +51,7 @@ That is enough for the normal local demo. `make pipeline` starts the Docker stac
 
 ```bash
 make up        # start containers
+make fresh     # reset volumes and run full pipeline
 make ingest    # load FHIR, HL7, and CSV samples
 make dbt       # run dbt models and tests
 make raw       # show row counts for raw ingestion tables

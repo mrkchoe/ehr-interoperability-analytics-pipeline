@@ -1,4 +1,4 @@
-.PHONY: help up down reset ingest dbt pipeline raw counts sources marts demo
+.PHONY: help up down reset fresh ingest dbt pipeline raw counts sources marts demo
 
 .DEFAULT_GOAL := help
 
@@ -9,6 +9,7 @@ help:
 	@echo "  make up        Start stack (waits for Postgres)"
 	@echo "  make down      Stop containers"
 	@echo "  make reset     Stop and remove volumes"
+	@echo "  make fresh     Reset volumes and run full pipeline"
 	@echo "  make ingest    Load FHIR, HL7, and CSV into raw tables"
 	@echo "  make dbt       Run dbt models and tests"
 	@echo "  make pipeline  Full ingest + transform flow"
@@ -27,6 +28,8 @@ down:
 reset:
 	docker compose down -v
 
+fresh: reset pipeline
+
 ingest:
 	docker compose exec ingestion python ingestion/fhir_loader.py
 	docker compose exec ingestion python ingestion/hl7_parser.py
@@ -40,16 +43,16 @@ pipeline:
 	./run_pipeline.sh
 
 raw:
-	$(PSQL) < sql/raw_counts.sql
+	$(PSQL) < queries/raw_counts.sql
 
 counts:
-	$(PSQL) < sql/staging_counts.sql
+	$(PSQL) < queries/staging_counts.sql
 
 sources:
-	$(PSQL) < sql/records_by_source.sql
+	$(PSQL) < queries/records_by_source.sql
 
 marts:
-	$(PSQL) < sql/demo_marts.sql
+	$(PSQL) < queries/demo_marts.sql
 
 demo:
-	cat sql/raw_counts.sql sql/staging_counts.sql sql/records_by_source.sql sql/demo_marts.sql | $(PSQL)
+	cat queries/pipeline_summary.sql queries/demo_marts.sql | $(PSQL)

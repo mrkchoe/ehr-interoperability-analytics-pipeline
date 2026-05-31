@@ -17,7 +17,6 @@ echo "Running dbt tests..."
 docker compose exec dbt dbt test
 
 echo "Pipeline summary:"
-cat sql/raw_counts.sql sql/staging_counts.sql sql/records_by_source.sql \
-  | docker compose exec -T postgres psql -U ehr -d ehr_analytics
+docker compose exec -T postgres psql -U ehr -d ehr_analytics < queries/pipeline_summary.sql
 
 echo "Pipeline complete."

@@ -45,7 +45,9 @@ Show the demo queries:
 make demo
 ```
 
-That is enough for the normal local demo. `make pipeline` starts the Docker stack, loads the sample data, runs dbt, runs tests, and prints raw, staging, and source-level row counts.
+That is enough for the normal local demo. `make pipeline` starts the Docker stack, loads the sample data, runs dbt, runs tests, and prints row counts after ingest and again at the end.
+
+Run `make help` to list all targets.
 
 ## Useful Commands
 
@@ -57,8 +59,10 @@ make dbt       # run dbt models and tests
 make raw       # show row counts for raw ingestion tables
 make counts    # show row counts for unified tables
 make sources   # show row counts by source format/entity
+make summary   # show raw, staging, and source counts
 make marts     # show final analytics marts
 make demo      # run full demo query set
+make ps        # show container status
 make down      # stop containers
 make reset     # stop containers and remove volumes
 ```

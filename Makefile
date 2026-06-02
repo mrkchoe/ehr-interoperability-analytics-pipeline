@@ -1,4 +1,4 @@
-.PHONY: help up down reset fresh ingest dbt pipeline raw counts sources marts demo
+.PHONY: help up down reset fresh ingest dbt pipeline raw counts sources summary marts demo ps
 
 .DEFAULT_GOAL := help
 
@@ -16,8 +16,10 @@ help:
 	@echo "  make raw       Show raw table row counts"
 	@echo "  make counts    Show staging model row counts"
 	@echo "  make sources   Show record counts by source system"
+	@echo "  make summary   Show raw, staging, and source counts"
 	@echo "  make marts     Show final analytics marts"
 	@echo "  make demo      Run full demo query set"
+	@echo "  make ps        Show container status"
 
 up:
 	docker compose up -d --wait
@@ -51,8 +53,14 @@ counts:
 sources:
 	$(PSQL) < queries/records_by_source.sql
 
+summary:
+	$(PSQL) < queries/pipeline_summary.sql
+
 marts:
 	$(PSQL) < queries/demo_marts.sql
 
 demo:
 	cat queries/pipeline_summary.sql queries/demo_marts.sql | $(PSQL)
+
+ps:
+	docker compose ps

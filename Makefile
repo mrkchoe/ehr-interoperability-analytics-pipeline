@@ -1,4 +1,4 @@
-.PHONY: help up down reset fresh ingest dbt pipeline raw counts sources summary marts demo ps
+.PHONY: help build up down reset fresh ingest dbt pipeline raw counts sources summary marts demo ps logs
 
 .DEFAULT_GOAL := help
 
@@ -6,6 +6,7 @@ PSQL = docker compose exec -T postgres psql -U ehr -d ehr_analytics
 
 help:
 	@echo "Targets:"
+	@echo "  make build     Build ingestion image"
 	@echo "  make up        Start stack (waits for Postgres)"
 	@echo "  make down      Stop containers"
 	@echo "  make reset     Stop and remove volumes"
@@ -20,6 +21,10 @@ help:
 	@echo "  make marts     Show final analytics marts"
 	@echo "  make demo      Run full demo query set"
 	@echo "  make ps        Show container status"
+	@echo "  make logs      Tail service logs"
+
+build:
+	docker compose build ingestion
 
 up:
 	docker compose up -d --wait
@@ -64,3 +69,6 @@ demo:
 
 ps:
 	docker compose ps
+
+logs:
+	docker compose logs --tail=100

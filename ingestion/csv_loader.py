@@ -1,21 +1,10 @@
 import csv
-import os
 from pathlib import Path
 
-import psycopg
+from db import get_conn
 
 
 CSV_DIR = Path("data/csv")
-
-
-def get_conn():
-    return psycopg.connect(
-        host=os.getenv("PGHOST", "localhost"),
-        port=os.getenv("PGPORT", "5432"),
-        user=os.getenv("PGUSER", "ehr"),
-        password=os.getenv("PGPASSWORD", "ehr"),
-        dbname=os.getenv("PGDATABASE", "ehr_analytics"),
-    )
 
 
 def load_patients(cur, file_path: Path):

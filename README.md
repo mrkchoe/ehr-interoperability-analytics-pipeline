@@ -52,6 +52,7 @@ Run `make help` to list all targets.
 ## Useful Commands
 
 ```bash
+make build     # build ingestion image
 make up        # start containers
 make fresh     # reset volumes and run full pipeline
 make ingest    # load FHIR, HL7, and CSV samples
@@ -63,6 +64,7 @@ make summary   # show raw, staging, and source counts
 make marts     # show final analytics marts
 make demo      # run full demo query set
 make ps        # show container status
+make logs      # tail service logs
 make down      # stop containers
 make reset     # stop containers and remove volumes
 ```

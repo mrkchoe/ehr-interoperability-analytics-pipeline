@@ -1,20 +1,9 @@
-import os
 from pathlib import Path
 
-import psycopg
+from db import get_conn
 
 
 HL7_DIR = Path("data/hl7")
-
-
-def get_conn():
-    return psycopg.connect(
-        host=os.getenv("PGHOST", "localhost"),
-        port=os.getenv("PGPORT", "5432"),
-        user=os.getenv("PGUSER", "ehr"),
-        password=os.getenv("PGPASSWORD", "ehr"),
-        dbname=os.getenv("PGDATABASE", "ehr_analytics"),
-    )
 
 
 def parse_message(text: str):

@@ -1,96 +1,133 @@
 # ehr-interoperability-analytics-pipeline
 
-A small local demo that standardizes synthetic EHR data from different formats into shared analytics tables.
+A **local, one-command demo** that takes synthetic EHR data in three formats and turns it into shared analytics tables in Postgres.
 
-It reads three common source formats:
+**Prerequisites:** Docker and Docker Compose.
 
-- FHIR NDJSON
-- HL7 v2
-- CSV extracts
+---
 
-## Goal
+## What this demo does
 
-The project shows one simple interoperability pattern: load FHIR, HL7 v2, and CSV data, then normalize them into common `patients`, `encounters`, `conditions`, and `observations` models.
-
-## How It Works
+| Capability | What you see |
+|------------|--------------|
+| **Multi-format ingest** | Loads the same kinds of clinical data from **FHIR NDJSON**, **HL7 v2**, and **CSV** into Postgres |
+| **Unified clinical models** | Normalizes everything into shared `patients`, `encounters`, `conditions`, and `observations` tables |
+| **Analytics marts** | Builds ready-to-query summaries for utilization, volume, trends, and source coverage |
+| **Built-in checks** | Runs dbt tests on IDs, relationships, and source-system values |
 
 ```text
-FHIR / HL7 / CSV -> Python loaders -> raw Postgres tables -> standardized dbt models -> analytics tables
+FHIR / HL7 / CSV  →  Python loaders  →  raw tables  →  dbt  →  analytics marts
 ```
 
-The main analytics tables are:
+---
 
-- `patient_summary`
-- `encounter_counts`
-- `observation_trends`
-- `records_by_source`
+## Run the demo (start here)
 
-## Quick Start
-
-Run the whole pipeline from a clean slate:
+Three commands are enough for a full walkthrough:
 
 ```bash
-make fresh
+make fresh    # clean slate: start stack, load data, transform, test, print counts
+make demo     # show counts + final analytics tables
+make down     # stop containers when finished
 ```
 
-Or run the pipeline on an existing stack:
+| Command | What happens |
+|---------|----------------|
+| `make fresh` | Resets volumes, runs the full pipeline (ingest → dbt → tests), prints row counts after load and at the end |
+| `make demo` | Runs the full demo query set: raw counts, unified counts, source breakdown, and analytics marts |
+| `make down` | Stops the Docker stack |
+
+**Already have a running stack?** Use `make pipeline` instead of `make fresh` to re-run ingest and transforms without wiping data.
+
+**Just want the charts/tables?** After a pipeline run:
 
 ```bash
-make pipeline
+make marts
 ```
 
-Show the demo queries:
+---
 
-```bash
-make demo
-```
+## What you get
 
-That is enough for the normal local demo. `make pipeline` starts the Docker stack, loads the sample data, runs dbt, runs tests, and prints row counts after ingest and again at the end.
+### Unified tables (staging)
 
-Run `make help` to list all targets.
-
-## Useful Commands
-
-```bash
-make build     # build ingestion image
-make up        # start containers
-make fresh     # reset volumes and run full pipeline
-make ingest    # load FHIR, HL7, and CSV samples
-make dbt       # run dbt models and tests
-make raw       # show row counts for raw ingestion tables
-make counts    # show row counts for unified tables
-make sources   # show row counts by source format/entity
-make summary   # show raw, staging, and source counts
-make marts     # show final analytics marts
-make demo      # run full demo query set
-make ps        # show container status
-make logs      # tail service logs
-make down      # stop containers
-make reset     # stop containers and remove volumes
-```
-
-## What Gets Built
-
-The loaders write source-specific tables into the `raw` schema. dbt then creates unified analytics models for:
+Same shape regardless of source format:
 
 - `patients`
 - `encounters`
 - `conditions`
 - `observations`
 
-The final marts answer simple questions:
+### Analytics marts (the demo payoff)
 
-- patient-level utilization in `patient_summary`
-- monthly encounter volume in `encounter_counts`
-- observation trends over time in `observation_trends`
-- row counts by source format in `records_by_source`
+| Mart | Answers |
+|------|---------|
+| `patient_summary` | Who has the most encounters and observations? |
+| `encounter_counts` | How does encounter volume trend by month and class? |
+| `observation_trends` | How do observation metrics change over time? |
+| `records_by_source` | How many rows came from FHIR vs HL7 vs CSV per entity? |
 
-## Data Quality
+`make demo` prints counts at each layer, then shows these marts.
 
-dbt tests check required IDs, uniqueness for key tables, relationships between patients, encounters, conditions, and observations, and accepted values for `records_by_source`.
+---
+
+## Demo flow (for presenters)
+
+1. **`make fresh`** — narrate: “We load three healthcare formats, standardize them, and validate with tests.”
+2. Watch the **raw load counts** (right after ingest) and the **pipeline summary** (after dbt).
+3. **`make demo`** — walk through unified counts, source mix, and mart outputs.
+4. **`make down`** — clean shutdown.
+
+---
+
+## Reference (optional commands)
+
+Use these when you need finer control or troubleshooting—not for the default demo.
+
+### Pipeline steps
+
+```bash
+make pipeline   # full flow without resetting volumes
+make ingest       # load FHIR, HL7, and CSV only
+make dbt          # run models and tests only
+```
+
+### Inspect results
+
+```bash
+make summary      # raw + staging + source counts
+make raw          # raw ingestion table counts
+make counts       # unified staging counts
+make sources      # records by source system
+make marts        # analytics marts only
+```
+
+### Stack maintenance
+
+```bash
+make up           # start containers
+make reset        # stop and remove volumes (no pipeline)
+make build        # rebuild ingestion image
+make ps           # container status
+make logs         # tail service logs
+make help         # list all make targets
+```
+
+---
+
+## Data quality
+
+dbt tests cover:
+
+- Required IDs on core entities
+- Uniqueness on key tables
+- Relationships between patients, encounters, conditions, and observations
+- Accepted values for `records_by_source` (`entity`, `source_system`)
+
+---
 
 ## Notes
 
-- Everything runs locally with Docker Compose.
-- All data is synthetic sample data.
-- There are no cloud services, APIs, or auth.
+- Runs entirely on your machine with Docker Compose.
+- All data is **synthetic** sample data for demos.
+- No cloud services, APIs, or authentication.

@@ -22,4 +22,4 @@ docker compose exec dbt dbt test
 echo "Pipeline summary:"
 docker compose exec -T postgres psql -U ehr -d ehr_analytics < queries/pipeline_summary.sql
 
-echo "Pipeline complete."
+echo "Pipeline complete. Run 'make demo' to view analytics output."

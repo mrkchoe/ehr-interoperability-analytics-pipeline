@@ -1,25 +1,29 @@
-.PHONY: help build up down reset fresh ingest dbt pipeline raw counts sources summary marts demo ps logs
+.PHONY: help build up down reset fresh ingest dbt pipeline check raw counts sources summary marts demo ps logs
 
 .DEFAULT_GOAL := help
 
 PSQL = docker compose exec -T postgres psql -U ehr -d ehr_analytics
 
 help:
-	@echo "Targets:"
-	@echo "  make build     Build ingestion image"
-	@echo "  make up        Start stack (waits for Postgres)"
-	@echo "  make down      Stop containers"
-	@echo "  make reset     Stop and remove volumes"
+	@echo "Demo (start here):"
 	@echo "  make fresh     Reset volumes and run full pipeline"
+	@echo "  make demo      Run full demo query set"
+	@echo "  make marts     Show final analytics marts"
+	@echo "  make down      Stop containers"
+	@echo ""
+	@echo "Pipeline:"
+	@echo "  make pipeline  Full ingest + transform flow"
 	@echo "  make ingest    Load FHIR, HL7, and CSV into raw tables"
 	@echo "  make dbt       Run dbt models and tests"
-	@echo "  make pipeline  Full ingest + transform flow"
+	@echo ""
+	@echo "Reference:"
+	@echo "  make summary   Show raw, staging, and source counts"
 	@echo "  make raw       Show raw table row counts"
 	@echo "  make counts    Show staging model row counts"
 	@echo "  make sources   Show record counts by source system"
-	@echo "  make summary   Show raw, staging, and source counts"
-	@echo "  make marts     Show final analytics marts"
-	@echo "  make demo      Run full demo query set"
+	@echo "  make up        Start stack (waits for Postgres)"
+	@echo "  make reset     Stop and remove volumes"
+	@echo "  make build     Build ingestion image"
 	@echo "  make ps        Show container status"
 	@echo "  make logs      Tail service logs"
 
@@ -49,23 +53,27 @@ dbt:
 pipeline:
 	./run_pipeline.sh
 
-raw:
+check:
+	@docker compose exec -T postgres pg_isready -U ehr -d ehr_analytics >/dev/null 2>&1 || \
+		(echo "Start the stack first: make up  (or make fresh)" >&2; exit 1)
+
+raw: check
 	$(PSQL) < queries/raw_counts.sql
 
-counts:
+counts: check
 	$(PSQL) < queries/staging_counts.sql
 
-sources:
+sources: check
 	$(PSQL) < queries/records_by_source.sql
 
-summary:
+summary: check
 	$(PSQL) < queries/pipeline_summary.sql
 
-marts:
+marts: check
 	$(PSQL) < queries/demo_marts.sql
 
-demo:
-	cat queries/pipeline_summary.sql queries/demo_marts.sql | $(PSQL)
+demo: check
+	$(PSQL) < queries/demo_all.sql
 
 ps:
 	docker compose ps

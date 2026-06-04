@@ -34,7 +34,7 @@ make down     # stop containers when finished
 | Command | What happens |
 |---------|----------------|
 | `make fresh` | Resets volumes, runs the full pipeline (ingest → dbt → tests), prints row counts after load and at the end |
-| `make demo` | Runs the full demo query set: raw counts, unified counts, source breakdown, and analytics marts |
+| `make demo` | Runs the full demo query set: raw counts, unified counts, source breakdown, and analytics marts (requires a running stack) |
 | `make down` | Stops the Docker stack |
 
 **Already have a running stack?** Use `make pipeline` instead of `make fresh` to re-run ingest and transforms without wiping data.

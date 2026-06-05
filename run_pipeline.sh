@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+PSQL="docker compose exec -T postgres psql -U ehr -d ehr_analytics"
+
 echo "Starting containers (waiting for Postgres healthcheck)..."
 docker compose up -d --wait
 
@@ -11,7 +13,7 @@ docker compose exec ingestion python ingestion/hl7_parser.py
 docker compose exec ingestion python ingestion/csv_loader.py
 
 echo "Raw load counts:"
-docker compose exec -T postgres psql -U ehr -d ehr_analytics < queries/raw_counts.sql
+$PSQL < queries/raw_counts.sql
 
 echo "Running dbt models..."
 docker compose exec dbt dbt run
@@ -20,6 +22,6 @@ echo "Running dbt tests..."
 docker compose exec dbt dbt test
 
 echo "Pipeline summary:"
-docker compose exec -T postgres psql -U ehr -d ehr_analytics < queries/pipeline_summary.sql
+$PSQL < queries/pipeline_summary.sql
 
 echo "Pipeline complete. Run 'make demo' to view analytics output."

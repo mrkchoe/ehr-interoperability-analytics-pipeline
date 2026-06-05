@@ -23,7 +23,14 @@ FHIR / HL7 / CSV  →  Python loaders  →  raw tables  →  dbt  →  analytics
 
 ## Run the demo (start here)
 
-Three commands are enough for a full walkthrough:
+**One command** for the full presenter walkthrough:
+
+```bash
+make walkthrough    # reset, pipeline, then demo output
+make down           # stop containers when finished
+```
+
+Or run step by step:
 
 ```bash
 make fresh    # clean slate: start stack, load data, transform, test, print counts
@@ -33,6 +40,7 @@ make down     # stop containers when finished
 
 | Command | What happens |
 |---------|----------------|
+| `make walkthrough` | Runs `make fresh` then `make demo` — full end-to-end demo in one shot |
 | `make fresh` | Resets volumes, runs the full pipeline (ingest → dbt → tests), prints row counts after load and at the end |
 | `make demo` | Runs the full demo query set: raw counts, unified counts, source breakdown, and analytics marts (requires a running stack) |
 | `make down` | Stops the Docker stack |
@@ -73,10 +81,9 @@ Same shape regardless of source format:
 
 ## Demo flow (for presenters)
 
-1. **`make fresh`** — narrate: “We load three healthcare formats, standardize them, and validate with tests.”
-2. Watch the **raw load counts** (right after ingest) and the **pipeline summary** (after dbt).
-3. **`make demo`** — walk through unified counts, source mix, and mart outputs.
-4. **`make down`** — clean shutdown.
+1. **`make walkthrough`** — one command: reset, load, transform, test, then show all demo output.
+2. Or step through: **`make fresh`** (pipeline + counts), then **`make demo`** (marts).
+3. **`make down`** — clean shutdown.
 
 ---
 
@@ -87,7 +94,8 @@ Use these when you need finer control or troubleshooting—not for the default d
 ### Pipeline steps
 
 ```bash
-make pipeline   # full flow without resetting volumes
+make walkthrough  # full pipeline + demo output
+make pipeline     # full flow without resetting volumes
 make ingest       # load FHIR, HL7, and CSV only
 make dbt          # run models and tests only
 ```

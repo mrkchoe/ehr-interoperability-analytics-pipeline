@@ -1,4 +1,4 @@
-.PHONY: help build up down reset fresh ingest dbt pipeline check raw counts sources summary marts demo ps logs
+.PHONY: help build up down reset fresh walkthrough ingest dbt pipeline check raw counts sources summary marts demo ps logs
 
 .DEFAULT_GOAL := help
 
@@ -6,8 +6,9 @@ PSQL = docker compose exec -T postgres psql -U ehr -d ehr_analytics
 
 help:
 	@echo "Demo (start here):"
-	@echo "  make fresh     Reset volumes and run full pipeline"
-	@echo "  make demo      Run full demo query set"
+	@echo "  make fresh        Reset volumes and run full pipeline"
+	@echo "  make walkthrough  Full pipeline + demo output in one command"
+	@echo "  make demo         Run full demo query set"
 	@echo "  make marts     Show final analytics marts"
 	@echo "  make down      Stop containers"
 	@echo ""
@@ -40,6 +41,8 @@ reset:
 	docker compose down -v
 
 fresh: reset pipeline
+
+walkthrough: fresh demo
 
 ingest:
 	docker compose exec ingestion python ingestion/fhir_loader.py

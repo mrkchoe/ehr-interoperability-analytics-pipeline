@@ -108,6 +108,7 @@ make raw          # raw ingestion table counts
 make counts       # unified staging counts
 make sources      # records by source system
 make marts        # analytics marts only
+make sql          # interactive Postgres shell
 ```
 
 ### Stack maintenance

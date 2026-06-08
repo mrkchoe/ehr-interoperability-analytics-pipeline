@@ -1,4 +1,4 @@
-.PHONY: help build up down reset fresh walkthrough ingest dbt pipeline check raw counts sources summary marts demo ps logs
+.PHONY: help build up down reset fresh walkthrough ingest dbt pipeline check raw counts sources summary marts demo sql ps logs
 
 .DEFAULT_GOAL := help
 
@@ -9,8 +9,8 @@ help:
 	@echo "  make fresh        Reset volumes and run full pipeline"
 	@echo "  make walkthrough  Full pipeline + demo output in one command"
 	@echo "  make demo         Run full demo query set"
-	@echo "  make marts     Show final analytics marts"
-	@echo "  make down      Stop containers"
+	@echo "  make marts        Show final analytics marts"
+	@echo "  make down         Stop containers"
 	@echo ""
 	@echo "Pipeline:"
 	@echo "  make pipeline  Full ingest + transform flow"
@@ -21,8 +21,9 @@ help:
 	@echo "  make summary   Show raw, staging, and source counts"
 	@echo "  make raw       Show raw table row counts"
 	@echo "  make counts    Show staging model row counts"
-	@echo "  make sources   Show record counts by source system"
-	@echo "  make up        Start stack (waits for Postgres)"
+	@echo "  make sources      Show record counts by source system"
+	@echo "  make sql          Open interactive Postgres shell"
+	@echo "  make up           Start stack (waits for Postgres)"
 	@echo "  make reset     Stop and remove volumes"
 	@echo "  make build     Build ingestion image"
 	@echo "  make ps        Show container status"
@@ -43,6 +44,8 @@ reset:
 fresh: reset pipeline
 
 walkthrough: fresh demo
+	@echo ""
+	@echo "Walkthrough complete. Run 'make down' to stop containers."
 
 ingest:
 	docker compose exec ingestion python ingestion/fhir_loader.py
@@ -77,6 +80,9 @@ marts: check
 
 demo: check
 	$(PSQL) < queries/demo_all.sql
+
+sql: check
+	docker compose exec postgres psql -U ehr -d ehr_analytics
 
 ps:
 	docker compose ps
